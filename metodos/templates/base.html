@@ -1,0 +1,29 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Programación Lineal</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+    <header>
+        <h1>Programación Lineal</h1>
+        <nav>
+            <ul>
+                <li><a href="{% url 'index' %}">Inicio</a></li>
+                <li><a href="{% url 'metodografico' %}">Metodo Gráfico</a></li>
+                <li><a href="{% url 'metodosimplex' %}">Metodo Simplex</a></li>   
+                <li><a href="{% url 'metododual' %}">Metodo Dual</a></li>   
+                <li><a href="{% url 'metodogranm' %}">Metodo Gran M</a></li>   
+                <li><a href="{% url 'metododosfases' %}">Metodo Dos Fases</a></li>   
+                <li></li>
+            </ul>
+        </nav>
+    </header>
+    {% block content %}
+    {% endblock %}
+</body>
+</html>

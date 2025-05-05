@@ -1,0 +1,194 @@
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<body>
+</body>
+</html>
+<div class="content-section">
+    <article class="content-article">
+        <h2 id="conceptos" class="article-title">Método Dual</h2>
+        <p class="article-text">Como sabemos, el método simplex es un algoritmo iterativo que iniciando en una solución básica factible pero no óptima, genera soluciones básicas factibles cada vez mejores hasta encontrar la solución óptima (si esta existe). Nótese que la base de su lógica es mantener la factibilidad, mientras busca la optimalidad. Pero surge la posibilidad de usar otro esquema igualmente iterativo, que como contraparte del simplex, comienza en una solución básica óptima, pero no factible y mantiene la inmejorabilidad mientras busca la factibilidad. Con este procedimiento se llega igualmente a la solución óptima.</p>
+        <p class="article-text">El nuevo algoritmo fue desarrollado en 1954 por C. E. Lemke y se conoce con el nombre de Método Dual-Simplex. A continuación se presenta su estructura y un ejemplo para ilustrar su aplicación.</p>
+    </article>
+
+    <article class="content-article">
+        <h2 id="algoritmo" class="article-title">Algoritmo Dual-Simplex</h2>
+        <p class="article-text">Primero se debe expresar el modelo en formato estándar, agregando las variables de holgura y de exceso que se requieran. Enseguida, en las ecuaciones que tengan variables de exceso (resultantes de restricciones de tipo &gt;), se debe multiplicar por (-1) en ambos lados, para hacer positivo el coeficiente de la variable de exceso, y formar así un vector unitario que nos permita tomar esta variable de exceso como una variable básica inicial sin necesidad de agregar una variable artificial en esa restricción.</p>
+        <p class="article-text">Al hacer lo anterior se logra que debajo de las variables básicas aparezca una matriz identidad, que es la que el simplex siempre toma como base inicial. Obtendremos que los términos del lado derecho de las ecuaciones multiplicadas por (-1) quedan con signo negativo, lo cual hace que la solución inicial sea infactible.</p>
+        <p class="article-text">Es importante destacar que este proceso es muy útil ya que en muchos modelos evita la inclusión de variables artificiales en el momento de transformar un modelo a formato estándar.</p>
+    </article>
+
+    <article class="content-article">
+        <h2 id="pasos" class="article-title">Pasos del Algoritmo</h2>
+        <ol class="article-text">
+            <li>Paso 1: Hallar una solución básica inicial infactible e inmejorable</li>
+            <p class="article-text">Escribir el tablero inicial tomando a las variables de holgura y de exceso como variables básicas iniciales.</p>
+            <li>Paso 2: Prueba de factibilidad</li>
+            <p class="article-text">
+                <ul class="benefits-list">
+                    <li>Si todas las variables básicas son no negativas, la actual solución es la óptima.</li>
+                    <li>Si hay al menos una variable básica negativa, seleccionar como variable de salida (llamémosla (XB)<sub>s</sub>), a aquella con el valor más negativo. Los empates se pueden romper arbitrariamente.</li>
+                </ul>
+            </p>
+            <li>Paso 3: Prueba de inmejorabilidad</li>
+            <p class="article-text">
+                <ul class="benefits-list">
+                    <li>Si en el renglón de la variable básica de salida (XB)<sub>s</sub> todos los coeficientes de reemplazo con las variables no básicas son no negativos, la solución del modelo es óptima y limitada. Se termina el proceso.</li>
+                    <li>Si en el renglón de la variable básica de salida (XB)<sub>s</sub> hay al menos un coeficiente de intercambio negativo, se efectúan los cocientes entre el efecto neto de cada variable no básica y su correspondiente coeficiente de intercambio negativo. Es decir, siendo (XB)<sub>s</sub> la variable de salida se calculan todos los cocientes.</li>
+                    <li>Se toma como variable de entrada (llamémosla Xe) a aquella que corresponda al mínimo de los cocientes del anterior conjunto.</li>
+                    <li>Si la variable de entrada es Xe, el elemento pivote será el elemento (Se)<sub>s</sub>.</li>
+                    <li>El empate se puede romper arbitrariamente.</li>
+                    <li>Aplicar la operación de pivoteo para generar la nueva tabla, en la cual aparezca Xe como variable básica en lugar de la variable de salida (XB)<sub>s</sub>.</li>
+                    <li>Repetir el algoritmo a partir del paso 2.</li>
+                </ul>
+            </p>
+        </ol>
+    </article>
+    <h2 id="conceptos" class="article-title">Video</h2>
+    <div class="video-container">
+      <iframe width="560" height="315" src="https://www.youtube.com/embed/A499g_w-2HA?si=8K8QQdyY5tHrs6Km" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+</div>
+<section class="content-section">
+    <h2 id="conceptos" class="article-title">Algoritmo</h2>
+    <form action="" method="post">
+        {% csrf_token %}
+        <label for="variables">Digite la cantidad de variables:</label>
+        <input name="variables" type="number" placeholder="Max 5">
+        <br>
+        <label for="restricciones">Digite la cantidad de restricciones:</label>
+        <input name="restricciones" type="number" placeholder="Max 5">
+        <br>
+        <select name=>
+            <option value="<=">Maximizar</option>
+            <option value=">=">Minimizar</option>
+          </select>
+          <br>
+        <button name="action" value="generarModelo" >Generar modelo</button>
+        <br>
+    
+    </form>
+</section>
+<section class="content-section"   style="display: {{ ocultar }};">
+    <section  class="content-section"     style="display: {{ ocultar }};">
+        <form action="" method="post">
+            {% csrf_token %}
+            <label for="variables">Funcion Objetivo:</label>
+            {% for i in cantVariables %}
+                {% if forloop.first %}  
+                    <input name="variablesFuncion_{{i}}" type="number" placeholder="Max 5">
+                    <label for="variables">X{{i}}</label>
+                {% endif %}
+                {% if not forloop.first %}
+                    <label for="variables">+</label>    
+                    <input name="variablesFuncion_{{i}}" type="number" placeholder="Max 5">
+                    <label for="variables">X{{i}}</label>   
+                {% endif %}
+            {% endfor %}
+            <br>
+            <label for="variables">Sujeta a:</label>
+            {% for j in cantRestricciones %}
+            <br>
+                {% for i in cantVariables %}
+                        {% if forloop.first %}  
+                            <input name="variables_{{j}}_{{i}}" type="number" placeholder="Max 5">
+                            <label for="variables">X{{i}}</label>
+                        {% endif %}
+                        {% if not forloop.first %}
+                            <label for="variables">+</label>
+                            <input name="variables_{{j}}_{{i}}" type="number" placeholder="Max 5">
+                            <label for="variables">X{{i}}</label>
+                        {% endif %}
+                 {% endfor %}
+                 <select name="signo{{j}}">
+                    <option value="<="><=</option>
+                    <option value=">=">>=</option>
+                  </select>
+                <input name="variablesR_{{j}}" type="number" placeholder="Max 5">
+            {% endfor %}
+            <br>
+            {% for i in cantVariables %}
+            <label for="variables">X{{i}}</label>
+            {% endfor %}
+            <label for="variables"> >= 0</label>
+            <br>
+            <button name="action" value="Desarrollar" >Desarrollar Metodo Simplex</button>
+        </form>
+    </section> 
+    
+    <section class="content-section" style="display: {{ ocularTablas }};">
+        <br>
+        <label for="variables">Nuevo Modelo</label>
+        <br>
+        <label for="variables">Z</label>
+        {% for j, i in nuevaFuncionZ %}
+        <label for="variables">-{{ j }}X{{ i }}</label>
+        {% endfor %}
+        {% for i in cantRestricciones %}
+        <label for="">+0S{{ forloop.counter0 }}</label>
+        {% endfor %}
+        <label for="">= 0</label>
+        <br>
+        {% for restricciones in retriccionesIndividuales %}
+            <br>
+            {% for muestreo in restricciones %} 
+                {% if forloop.last %}
+                    <label for="">+S{{ forloop.parentloop.counter }}</label>
+                {% endif %}
+                {% if forloop.first %}
+                    <label for="">{{muestreo}}</label>
+                    <label for="">X{{ forloop.counter0 }}</label>
+                {% endif %}
+                {% if not forloop.first %}
+                    {% if not forloop.last %}
+                        <label for=""> +{{muestreo}}</label>
+                        <label for="">X{{ forloop.counter0 }}</label>
+                    {% else %}
+    
+                        <label for="">= {{muestreo}} </label>
+                    {% endif %}
+                {% endif %}
+    
+                <label for=""></label>
+            {% endfor %}
+        {% endfor %}
+    </section>
+
+    <section class="content-section" style="display: {{ ocularTablas }};">
+        <h1>Resultados del método Dual</h1>
+    
+        <h2>Tablas:</h2>
+        {% for tabla in tablas %}
+
+            <table border="1">
+                <!-- Fila de encabezado -->
+                <h2 id="iteracion{{ forloop.counter0 }}">Iteración #{{ forloop.counter0 }}</h2>
+                <tr>
+                    {% for i in cantVariables %}
+                        <th>X{{ i }}</th>
+                    {% endfor %}
+                    {% for j in cantRestricciones%}
+                        <th>S{{ j }}</th>
+                    {% endfor %}
+                    <th>K</th>
+                </tr>
+                <!-- Fin de la fila de encabezado -->
+                
+                {% for fila in tabla %}
+                    <tr>
+                        {% for elemento in fila %}
+                            <td>{{ elemento }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </table>
+            <br>
+        {% endfor %}
+        <h2>Resultados:</h2>
+        <p>Z: {{ resultado }}</p>      
+    </section>
+
+{% endblock %}

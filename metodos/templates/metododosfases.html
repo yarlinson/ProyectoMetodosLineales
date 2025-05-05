@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="content-section" id="introduction">
+    <h2 class="article-title">¿Que es el metodo dos fases?</h2>
+    <p>El método simplex de dos fases es una técnica utilizada en programación lineal para resolver problemas de optimización donde la solución inicial factible no está disponible. Este método se utiliza especialmente cuando el problema tiene restricciones de igualdad o desigualdades que no permiten encontrar fácilmente una solución inicial factible.</p>
+
+
+
+    <h2 class="article-title">Fases</h2>
+    <h3>Fase 1: Encontrar una Solución Inicial Factible</h3>
+    <ul class="benefits-list">
+        <li>Formulación del Problema con Variables Artificiales: Si el problema original no tiene una solución inicial factible (como cuando las restricciones no permiten que todas las variables sean no negativas), se introducen variables artificiales para convertir las desigualdades en igualdades.</li>
+        <li>Función Objetivo de la Fase 1: Se define una nueva función objetivo, generalmente minimizando la suma de todas las variables artificiales. Esta nueva función objetivo se utiliza para encontrar una solución básica factible.</li>
+        <li>Aplicar el Método Simplex: Se utiliza el método simplex para resolver este problema modificado. El objetivo es eliminar todas las variables artificiales de la base, lo cual indicará que hemos encontrado una solución factible para el problema original.</li>
+        <li>Condiciones de Terminación de la Fase 1:
+            <ul>
+                <li>Si el valor óptimo de la función objetivo es cero y todas las variables artificiales son cero en la solución óptima, se ha encontrado una solución inicial factible para el problema original.</li>
+                <li>Si el valor óptimo de la función objetivo no es cero, el problema original no tiene solución factible (es decir, es infactible).</li>
+            </ul>
+        </li>
+    </ul>
+    <h3>Fase 2: Optimización de la Función Objetivo Original</h3>
+    <ul class="benefits-list">
+        <li>Reformulación del Problema: Si se encontró una solución factible en la Fase 1, se elimina la función objetivo auxiliar y se restablece la función objetivo original del problema.</li>
+        <li>Aplicar el Método Simplex con la Nueva Base: Se aplica el método simplex nuevamente, pero esta vez se utiliza la solución factible obtenida en la Fase 1 como la solución inicial.</li>
+        <li>Optimización: Se continúa iterando con el método simplex hasta encontrar la solución óptima de la función objetivo original.</li>
+    </ul>
+
+    <h2 id="conceptos" class="article-title">Video</h2>
+        <div class="video-container">
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/48EijOdhDkw?si=wzjQmv3mgKJ-_noL" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+</div>
+
+<section class="content-section">
+    <h2 id="conceptos" class="article-title">Algoritmo</h2>
+    <form action="" method="post">
+        {% csrf_token %}
+        <label for="variables">Digite la cantidad de variables:</label>
+        <input name="variables" type="number" placeholder="Max 5">
+        <br>
+        <label for="restricciones">Digite la cantidad de restricciones:</label>
+        <input name="restricciones" type="number" placeholder="Max 5">
+        <br>
+        <select name="tipo">
+            <option value="maximizar">Maximizar</option>
+            <option value="minimizar">Minimizar</option>
+          </select>
+          <br>
+        <button name="action" value="generarModelo" >Generar modelo</button>
+        <br>
+    
+    </form>
+</section>
+<section class="content-section"   style="display: {{ ocultar }};">
+    <section  class="content-section"     style="display: {{ ocultar }};">
+        <form action="" method="post">
+            {% csrf_token %}
+            <label for="variables">Funcion Objetivo:</label>
+            {% for i in cantVariables %}
+                {% if forloop.first %}  
+                    <input name="variablesFuncion_{{i}}" type="number" placeholder="Max 5">
+                    <label for="variables">X{{i}}</label>
+                {% endif %}
+                {% if not forloop.first %}
+                    <label for="variables">+</label>    
+                    <input name="variablesFuncion_{{i}}" type="number" placeholder="Max 5">
+                    <label for="variables">X{{i}}</label>   
+                {% endif %}
+            {% endfor %}
+            <br>
+            <label for="variables">Sujeta a:</label>
+            {% for j in cantRestricciones %}
+            <br>
+                {% for i in cantVariables %}
+                        {% if forloop.first %}  
+                            <input name="variables_{{j}}_{{i}}" type="number" placeholder="Max 5">
+                            <label for="variables">X{{i}}</label>
+                        {% endif %}
+                        {% if not forloop.first %}
+                            <label for="variables">+</label>
+                            <input name="variables_{{j}}_{{i}}" type="number" placeholder="Max 5">
+                            <label for="variables">X{{i}}</label>
+                        {% endif %}
+                 {% endfor %}
+                 <select name="signo{{j}}">
+                    <option value="<="><=</option>
+                    <option value=">=">>=</option>
+                    <option value="=">=</option>
+                  </select>
+                <input name="variablesR_{{j}}" type="number" placeholder="Max 5">
+            {% endfor %}
+            <br>
+            {% for i in cantVariables %}
+            <label for="variables">X{{i}}</label>
+            {% endfor %}
+            <label for="variables"> >= 0</label>
+            <br>
+            <button name="action" value="Desarrollar" >Desarrollar Metodo Simplex</button>
+        </form>
+        <h2 class="article-title">Resultados:</h2>
+        <p>Z: {{Zoptimo}}</p>    
+        <p>{{resultado}}</p>  
+
+    </section> 
+
+{% endblock %}

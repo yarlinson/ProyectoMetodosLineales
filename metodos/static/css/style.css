@@ -1,0 +1,113 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+header {
+    background-color: #007bff; /* Azul claro */
+    position: sticky;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+header h1 {
+    margin: 0;
+    padding: 20px;
+    text-align: center;
+    color: white;
+}
+nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    background-color: #007bff;
+}
+nav ul li {
+    margin: 0;
+}
+nav ul li a {
+    display: block;
+    padding: 15px 20px;
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+}
+nav ul li a:hover {
+    background-color: #4682B4; /* Azul más oscuro */
+}
+
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+/* Content Section */
+.content-section {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+}
+
+/* Image Figure */
+.image-figure {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.content-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+}
+
+/* Article Styles */
+.content-article {
+    margin-bottom: 20px;
+}
+
+.article-title {
+    color: #007bff;
+    font-size: 1.5em;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #87CEFA; /* Same as header color */
+    padding-bottom: 5px;
+}
+
+.article-text {
+    text-align: justify;
+    font-size: 1em;
+    line-height: 1.8;
+}
+
+/* List Styles */
+.benefits-list {
+    list-style-type: disc;
+    margin: 10px 0 0 20px;
+    padding-left: 10px;
+}
+
+.benefits-list li {
+    margin-bottom: 10px;
+}
+
+.video-container {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.video-container iframe {
+    max-width: 100%;
+    
+    border-radius: 10px;
+    border: none;
+}
+

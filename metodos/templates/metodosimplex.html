@@ -1,0 +1,188 @@
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+
+<div class="content-section">
+    <article>
+        <h1 class="article-title">¿Qué es el método simplex?</h1>
+        <p>El método simplex es un procedimiento iterativo para resolver problemas de programación lineal, donde se busca obtener la solución óptima de la función objetivo que logre cumplir el conjunto de restricciones.</p>
+        <p>Este algoritmo fue desarrollado en el año 1947 por el matemático norteamericano George Dantzig.</p>
+        <h2 class="article-title">Conceptos Básicos</h2>
+        <p>Para comprender de mejor manera el método simplex vamos a revisar algunas definiciones.</p>
+        <p>El método parte de dos afirmaciones importantes:</p>
+        <ol>
+            <li>El conjunto de posibles soluciones o conjunto factible de cualquier problema de programación lineal puede representarse mediante un poliedro convexo.</li>
+            <li>Si un problema de programación lineal tiene una solución óptima y finita, ésta estará en un vértice del poliedro convexo que representa al problema.</li>
+        </ol>
+        <p>El algoritmo simplex parte de uno de los vértices del poliedro, y verifica si es el óptimo; si no lo es, busca un nuevo vértice adyacentes que va mejorando el valor de la función objetivo. Se continúa iterando hasta llegar al vértice que representa la solución óptima.</p>
+    </article>
+
+    <article>
+        <h2 class="article-title">Pasos del Método Simplex</h2>
+        <p>Los pasos a seguir en el método simplex son:</p>
+        <ol>
+            <li>Definir el problema en la forma estándar y generar nuestra matriz.</li>
+            <li>Determinar la solución básica inicial.</li>
+            <li>Seleccionar la variable de entrada utilizando la condición de optimalidad. Si no se puede seleccionar una variable de entrada, quiere decir que estamos en la condición óptima y finalizan las iteraciones. De otro modo se continúa con el siguiente paso.</li>
+            <li>Seleccionar la variable de salida utilizando la condición de factibilidad.</li>
+            <li>Actualizar nuestra matriz realizando las operaciones de Gauss-Jordan. Volver al paso número 3.</li>
+        </ol>
+        <h2 id="conceptos" class="article-title">Video</h2>
+        <div class="video-container">
+            <iframe  width="560" height="315" src="https://www.youtube.com/embed/9OIbDjorz6c?si=_xWnRQjNfmwM4Iq1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        </div>
+    </article>
+</div>
+    
+
+    <section class="content-section">
+        <h2 id="conceptos" class="article-title">Algoritmo</h2>
+        <form action="" method="post">
+            {% csrf_token %}
+            <label for="variables">Digite la cantidad de variables:</label>
+            <input name="variables" type="number" placeholder="Max 5">
+            <br>
+            <label for="restricciones">Digite la cantidad de restricciones:</label>
+            <input name="restricciones" type="number" placeholder="Max 5">
+            <br>
+            <button name="action" value="generarModelo" >Generar modelo</button>
+            <button name "action" value="BorrarModelo">Limpiar</button>
+        </form>
+    </section>
+
+<section class="content-section"   style="display: {{ ocultar }};">    
+<section class="content-section" style="display: {{ ocultar }};">
+    <form action="" method="post">
+        {% csrf_token %}
+        <label for="variables">Funcion Objetivo:</label>
+        {% for i in cantVariables %}
+            {% if forloop.first %}  
+                <input name="variablesFuncion_{{i}}" type="number" placeholder="Max 5">
+                <label for="variables">X{{i}}</label>
+            {% endif %}
+            {% if not forloop.first %}
+                <label for="variables">+</label>    
+                <input name="variablesFuncion_{{i}}" type="number" placeholder="Max 5">
+                <label for="variables">X{{i}}</label>   
+            {% endif %}
+        {% endfor %}
+        <br>
+        <label for="variables">Sujeta a:</label>
+        {% for j in cantRestricciones %}
+        <br>
+            {% for i in cantVariables %}
+                    {% if forloop.first %}  
+                    <input name="variables_{{j}}_{{i}}" type="number" placeholder="Max 5">
+                    <label for="variables">X{{i}}</label>
+                    {% endif %}
+                    {% if not forloop.first %}
+                        <label for="variables">+</label>
+                        <input name="variables_{{j}}_{{i}}" type="number" placeholder="Max 5">
+                        <label for="variables">X{{i}}</label>
+                    {% endif %}
+             {% endfor %}
+             <select id="opciones">
+                <option value="opcion2"><=</option>
+              </select>
+            <input name="variablesR_{{j}}" type="number" placeholder="Max 5">
+        {% endfor %}
+        <br>
+        {% for i in cantVariables %}
+        <label for="variables">X{{i}}</label>
+        {% endfor %}
+        <label for="variables"> >= 0</label>
+        <br>
+        <button name="action" value="Desarrollar" >Desarrollar Metodo Simplex</button>
+    </form>
+</section> 
+<section class="content-section" style="display: {{ ocularTablas }};">
+    <br>
+    <h2 id="pasos">Nuevo Modelo</h2>
+    <br>
+    <label for="variables">Z</label>
+    {% for j, i in nuevaFuncionZ %}
+    <label for="variables">-{{ j }}X{{ i }}</label>
+    {% endfor %}
+    {% for i in cantRestricciones %}
+    <label for="">+0S{{ forloop.counter0 }}</label>
+    {% endfor %}
+    <label for="">= 0</label>
+    <br>
+    {% for restricciones in retriccionesIndividuales %}
+        <br>
+        {% for muestreo in restricciones %} 
+            {% if forloop.last %}
+                <label for="">+S{{ forloop.parentloop.counter }}</label>
+            {% endif %}
+            {% if forloop.first %}
+                <label for="">{{muestreo}}</label>
+                <label for="">X{{ forloop.counter0 }}</label>
+            {% endif %}
+            {% if not forloop.first %}
+                {% if not forloop.last %}
+                    <label for=""> +{{muestreo}}</label>
+                    <label for="">X{{ forloop.counter0 }}</label>
+                {% else %}
+
+                    <label for="">= {{muestreo}} </label>
+                {% endif %}
+            {% endif %}
+
+            <label for=""></label>
+        {% endfor %}
+    {% endfor %}
+</section>
+
+<section class="content-section" style="display: {{ ocularTablas }};">
+    <h1>Resultados del método simplex</h1>
+
+    <h2>Tablas:</h2>
+    {% for tabla in tablas %}
+        <table border="1">
+            <!-- Fila de encabezado -->
+            <h2 id="iteracion{{ forloop.counter0 }}">Iteración #{{ forloop.counter0 }}</h2>
+            <tr>
+                {% for i in cantVariables %}
+                    <th>X{{ i }}</th>
+                {% endfor %}
+                {% for j in cantRestricciones%}
+                    <th>S{{ j }}</th>
+                {% endfor %}
+                <th>K</th>
+            </tr>
+            <!-- Fin de la fila de encabezado -->
+            
+            {% for fila in tabla %}
+                <tr>
+                    {% for elemento in fila %}
+                        <td>{{ elemento }}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+        <br>
+    {% endfor %}
+    
+    <h2>Resultados:</h2>
+    <p>Tipo de resultados: {{ resultados }}</p>
+    <p>Z: {{ Zoptimo }}</p>
+</section>
+
+<script>
+    // Obtener todas las etiquetas h2 que muestran la iteración
+    var iteraciones = document.querySelectorAll('h2[id^="iteracion"]');
+
+    // Recorrer las etiquetas y establecer el número de iteración en aumento
+    for (var i = 0; i < iteraciones.length; i++) {
+        iteraciones[i].textContent = "Iteración #" + i;
+    }   
+</script>
+
+
+</body>
+</html>
+
+{% endblock %}

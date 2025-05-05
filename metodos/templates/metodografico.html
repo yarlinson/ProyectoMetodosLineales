@@ -1,0 +1,78 @@
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="content-section">
+    <article class="content-article">
+        <h2 id="explicacion" class="article-title">¿Qué es el Método Gráfico de Programación Lineal?</h2>
+        <p class="article-text">El método gráfico de programación lineal es una técnica visual utilizada para encontrar la solución óptima de un problema de programación lineal en dos variables. Este método se basa en representar gráficamente las restricciones y la función objetivo en un plano cartesiano, permitiendo identificar la región factible y el punto óptimo que maximiza o minimiza la función objetivo.</p>
+    </article>
+
+    <article class="content-article">
+        <h2 id="objetivos" class="article-title">Objetivos del Método Gráfico</h2>
+        <p class="article-text">1. <strong>Visualizar el Problema:</strong> Representar gráficamente las restricciones y la función objetivo para entender mejor la estructura del problema.</p>
+        <p class="article-text">2. <strong>Identificar la Región Factible:</strong> Delimitar el área donde se cumplen todas las restricciones simultáneamente.</p>
+        <p class="article-text">3. <strong>Encontrar la Solución Óptima:</strong> Determinar el punto en la región factible que maximiza o minimiza la función objetivo.</p>
+    </article>
+
+    <article class="content-article">
+        <h2 id="pasos" class="article-title">Pasos para Desarrollar el Método Gráfico</h2>
+        <ol class="article-text">
+            <li><strong>Formular el Problema:</strong> 
+                <ul class="benefits-list">
+                    <li>Identificar las variables de decisión.</li>
+                    <li>Establecer la función objetivo que se desea maximizar o minimizar.</li>
+                    <li>Plantear las restricciones del problema en forma de desigualdades.</li>
+                </ul>
+            </li>
+            <li><strong>Graficar las Restricciones:</strong> 
+                <ul class="benefits-list">
+                    <li>Convertir cada restricción en una ecuación de igualdad.</li>
+                    <li>Graficar cada ecuación en el plano cartesiano, dibujando las líneas correspondientes.</li>
+                    <li>Determinar el área que cumple con cada restricción (lado izquierdo o derecho de la línea, según corresponda).</li>
+                </ul>
+            </li>
+            <li><strong>Identificar la Región Factible:</strong> 
+                <ul class="benefits-list">
+                    <li>La región factible es el área donde se superponen todas las restricciones. Esta región debe ser convexa (una forma poligonal cerrada).</li>
+                    <li>Sombrear la región factible para visualizar claramente el área de interés.</li>
+                </ul>
+            </li>
+            <li><strong>Graficar la Función Objetivo:</strong> 
+                <ul class="benefits-list">
+                    <li>Seleccionar un valor arbitrario para la función objetivo y graficar la línea correspondiente.</li>
+                    <li>Mover la línea de la función objetivo paralelamente para encontrar el punto más alejado (en caso de maximización) o el más cercano (en caso de minimización) dentro de la región factible.</li>
+                </ul>
+            </li>
+            <li><strong>Determinar la Solución Óptima:</strong> 
+                <ul class="benefits-list">
+                    <li>Identificar los vértices de la región factible (puntos de intersección de las líneas de restricción).</li>
+                    <li>Evaluar la función objetivo en cada uno de los vértices.</li>
+                    <li>El vértice que proporciona el valor óptimo (máximo o mínimo) de la función objetivo es la solución del problema.</li>
+                </ul>
+            </li>
+            <li><strong>Verificación de la Solución:</strong> 
+                <ul class="benefits-list">
+                    <li>Verificar que el punto óptimo cumple con todas las restricciones del problema.</li>
+                    <li>Confirmar que la solución obtenida es la mejor posible dentro de la región factible.</li>
+                </ul>
+            </li>
+        </ol>
+    </article>
+    <h2 id="conceptos" class="article-title">Video</h2>
+    <div class="video-container">
+     <iframe width="560" height="315" src="https://www.youtube.com/embed/ivOoBgSwdhA?si=31_qR7IdAGSpizWj" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </div>
+
+    <a href="{% url 'descargar_archivo' %}">
+        <button type="button">Descargar Script</button>
+    </a>
+    <a href="{% url 'descargar_archivo_rar' %}">
+        <button type="button">Descargar Archivo .rar</button>
+    </a>
+    
+</div>
+
+{% endblock %}

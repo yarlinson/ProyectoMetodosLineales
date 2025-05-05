@@ -1,0 +1,133 @@
+
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="content-section">
+    <article class="content-article">
+        <h2 id="explicacion" class="article-title">¿Qué es el Método de la Gran M?</h2>
+        <p class="article-text">El método de la Gran M es una técnica utilizada en la programación lineal para resolver problemas que involucran restricciones que no pueden ser transformadas directamente en la forma estándar del método simplex. Es especialmente útil cuando se necesita manejar restricciones de igualdad y restricciones de desigualdad de tipo “≥”. Este método introduce variables artificiales en el modelo, que luego se penalizan en la función objetivo con un valor suficientemente grande (representado por “M”) para asegurarse de que estas variables no formen parte de la solución óptima final.</p>
+    </article>
+    <article class="content-article">
+        <h2 id="objetivos" class="article-title">Objetivos del Método de la Gran M</h2>
+        <p class="article-text">1. <strong>Convertir el Problema en Forma Estándar</strong>: Transformar restricciones de igualdad y desigualdad de tipo “≥” para que puedan ser manejadas con el método simplex.</p>
+        <p class="article-text">2. <strong>Asegurar Factibilidad Inicial</strong>: Introducir variables artificiales que proporcionen una solución inicial factible, aunque no necesariamente óptima.</p>
+        <p class="article-text">3. <strong>Penalizar Variables Artificiales</strong>: Utilizar un valor grande “M” para penalizar las variables artificiales en la función objetivo, asegurando que estas no aparezcan en la solución óptima final.</p>
+    </article>
+    <article class="content-article">
+        <h2 id="pasos" class="article-title">Pasos para Desarrollar el Método de la Gran M</h2>
+        <p class="article-text">1. <strong>Formular el Problema en Forma Estándar</strong>:
+            <ul class="benefits-list">
+                <li>Convertir todas las restricciones en igualdades añadiendo variables de holgura y exceso según corresponda.</li>
+                <li>Introducir variables artificiales para las restricciones de igualdad y desigualdad de tipo “≥”.</li>
+            </ul>
+        </p>
+        <p class="article-text">2. <strong>Modificar la Función Objetivo</strong>:
+            <ul class="benefits-list">
+                <li>Penalizar las variables artificiales en la función objetivo. Para problemas de maximización, restar “M” veces cada variable artificial; para problemas de minimización, sumar “M” veces cada variable artificial.</li>
+            </ul>
+        </p>
+        <p class="article-text">3. <strong>Construir la Tabla Inicial del Simplex</strong>:
+            <ul class="benefits-list">
+                <li>Incluir todas las variables originales, de holgura, exceso y artificiales en la tabla inicial del simplex.</li>
+            </ul>
+        </p>
+        <p class="article-text">4. <strong>Realizar Iteraciones del Método Simplex</strong>:
+            <ul class="benefits-list">
+                <li><strong>Prueba de Optimalidad</strong>: Verificar si la solución actual es óptima. Si todas las entradas en la fila de la función objetivo (excepto la columna de la solución) son no positivas (para maximización) o no negativas (para minimización), entonces la solución es óptima.</li>
+                <li><strong>Prueba de Factibilidad</strong>: Verificar si la solución actual es factible. Si todas las variables básicas (soluciones) son no negativas, entonces la solución es factible.</li>
+                <li><strong>Seleccionar Variable de Entrada</strong>: Escoger la variable con el coeficiente más negativo (para maximización) o más positivo (para minimización) en la función objetivo como variable de entrada.</li>
+                <li><strong>Seleccionar Variable de Salida</strong>: Utilizar la prueba de razón mínima (minimum ratio test) para determinar cuál variable saldrá de la base.</li>
+                <li><strong>Pivotar</strong>: Realizar operaciones de pivoteo para actualizar la tabla del simplex.</li>
+            </ul>
+        </p>
+        <p class="article-text">5. <strong>Iterar Hasta Encontrar la Solución Óptima</strong>:
+            <ul class="benefits-list">
+                <li>Repetir los pasos de prueba de optimalidad, prueba de factibilidad, selección de variable de entrada y salida, y pivotar hasta que la solución óptima sea encontrada.</li>
+            </ul>
+        </p>
+        <p class="article-text">6. <strong>Interpretar la Solución</strong>:
+            <ul class="benefits-list">
+                <li>Una vez que la solución óptima es alcanzada, interpretar los valores de las variables de decisión. Asegurarse de que las variables artificiales no estén en la base; si alguna lo está, significa que el problema no tiene una solución factible.</li>
+            </ul>
+        </p>
+        <h2 id="conceptos" class="article-title">Video</h2>
+        <div class="video-container">
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/z_k2HzGRXdA?si=o_kV0o90d31FckOb" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        </div>
+    </article>
+</div>
+<section class="content-section">
+    <h2 id="conceptos" class="article-title">Algoritmo</h2>
+    <form action="" method="post">
+        {% csrf_token %}
+        <label for="variables">Digite la cantidad de variables:</label>
+        <input name="variables" type="number" placeholder="Max 5">
+        <br>
+        <label for="restricciones">Digite la cantidad de restricciones:</label>
+        <input name="restricciones" type="number" placeholder="Max 5">
+        <br>
+        <select name="tipo">
+            <option value="maximizar">Maximizar</option>
+            <option value="minimizar">Minimizar</option>
+          </select>
+          <br>
+        <button name="action" value="generarModelo" >Generar modelo</button>
+        <br>
+    
+    </form>
+</section>
+<section class="content-section"   style="display: {{ ocultar }};">
+    <section  class="content-section"     style="display: {{ ocultar }};">
+        <form action="" method="post">
+            {% csrf_token %}
+            <label for="variables">Funcion Objetivo:</label>
+            {% for i in cantVariables %}
+                {% if forloop.first %}  
+                    <input name="variablesFuncion_{{i}}" type="number" placeholder="Max 5">
+                    <label for="variables">X{{i}}</label>
+                {% endif %}
+                {% if not forloop.first %}
+                    <label for="variables">+</label>    
+                    <input name="variablesFuncion_{{i}}" type="number" placeholder="Max 5">
+                    <label for="variables">X{{i}}</label>   
+                {% endif %}
+            {% endfor %}
+            <br>
+            <label for="variables">Sujeta a:</label>
+            {% for j in cantRestricciones %}
+            <br>
+                {% for i in cantVariables %}
+                        {% if forloop.first %}  
+                            <input name="variables_{{j}}_{{i}}" type="number" placeholder="Max 5">
+                            <label for="variables">X{{i}}</label>
+                        {% endif %}
+                        {% if not forloop.first %}
+                            <label for="variables">+</label>
+                            <input name="variables_{{j}}_{{i}}" type="number" placeholder="Max 5">
+                            <label for="variables">X{{i}}</label>
+                        {% endif %}
+                 {% endfor %}
+                 <select name="signo{{j}}">
+                    <option value="<="><=</option>
+                    <option value=">=">>=</option>
+                    <option value="=">=</option>
+                  </select>
+                <input name="variablesR_{{j}}" type="number" placeholder="Max 5">
+            {% endfor %}
+            <br>
+            {% for i in cantVariables %}
+            <label for="variables">X{{i}}</label>
+            {% endfor %}
+            <label for="variables"> >= 0</label>
+            <br>
+            <button name="action" value="Desarrollar" >Desarrollar Metodo Simplex</button>
+        </form>
+        <h2 class="article-title">Resultados:</h2>
+        <p> {{ resultado }}</p>
+
+    </section> 
+
+
+{% endblock %}
