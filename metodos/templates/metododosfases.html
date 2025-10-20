@@ -59,6 +59,9 @@
     <section  class="content-section"     style="display: {{ ocultar }};">
         <form action="" method="post">
             {% csrf_token %}
+            <input type="hidden" name="variables_count" value="{{ cantVariables|length }}">
+            <input type="hidden" name="restricciones_count" value="{{ cantRestricciones|length }}">
+            <input type="hidden" name="tipo" value="{{ tipo }}">
             <label for="variables">Funcion Objetivo:</label>
             {% for i in cantVariables %}
                 {% if forloop.first %}  
@@ -101,9 +104,28 @@
             <br>
             <button name="action" value="Desarrollar" >Desarrollar Metodo Simplex</button>
         </form>
-        <h2 class="article-title">Resultados:</h2>
-        <p>Z: {{Zoptimo}}</p>    
-        <p>{{resultado}}</p>  
+        {% if error %}
+            <div class="error-message" style="color: red; background-color: #ffe6e6; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                <strong>Error:</strong> {{ error }}
+            </div>
+        {% endif %}
+
+        {% if resultado %}
+            <h2 class="article-title">Resultados:</h2>
+            <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 10px 0;">
+                {% if Zoptimo %}
+                    <p><strong>Valor óptimo (Z):</strong> {{ Zoptimo|floatformat:2 }}</p>
+                {% endif %}
+                {% if resultado %}
+                    <p><strong>Valores de las variables:</strong></p>
+                    <ul>
+                        {% for variable, valor in resultado.items %}
+                            <li>{{ variable }} = {{ valor|floatformat:2 }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        {% endif %}  
 
     </section> 
 

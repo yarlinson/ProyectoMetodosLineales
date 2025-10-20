@@ -82,6 +82,8 @@
     <section  class="content-section"     style="display: {{ ocultar }};">
         <form action="" method="post">
             {% csrf_token %}
+            <input type="hidden" name="variables_count" value="{{ cantVariables|length }}">
+            <input type="hidden" name="restricciones_count" value="{{ cantRestricciones|length }}">
             <label for="variables">Funcion Objetivo:</label>
             {% for i in cantVariables %}
                 {% if forloop.first %}  
@@ -124,8 +126,33 @@
             <br>
             <button name="action" value="Desarrollar" >Desarrollar Metodo Simplex</button>
         </form>
-        <h2 class="article-title">Resultados:</h2>
-        <p> {{ resultado }}</p>
+        {% if error %}
+            <div class="error-message" style="color: red; background-color: #ffe6e6; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                <strong>Error:</strong> {{ error }}
+            </div>
+        {% endif %}
+
+        {% if resultado %}
+            <h2 class="article-title">Resultados:</h2>
+            <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 10px 0;">
+                {% if resultado.estado %}
+                    <p><strong>Estado:</strong> {{ resultado.estado }}</p>
+                {% endif %}
+                {% if resultado.valor_optimo %}
+                    <p><strong>Valor óptimo:</strong> {{ resultado.valor_optimo|floatformat:2 }}</p>
+                {% endif %}
+                {% if resultado %}
+                    <p><strong>Valores de las variables:</strong></p>
+                    <ul>
+                        {% for variable, valor in resultado.items %}
+                            {% if variable != 'estado' and variable != 'valor_optimo' %}
+                                <li>{{ variable }} = {{ valor|floatformat:2 }}</li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        {% endif %}
 
     </section> 
 

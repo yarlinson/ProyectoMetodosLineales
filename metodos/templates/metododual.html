@@ -1,12 +1,7 @@
-
 {% extends 'base.html' %}
 {% load static %}
 
 {% block content %}
-
-<body>
-</body>
-</html>
 <div class="content-section">
     <article class="content-article">
         <h2 id="conceptos" class="article-title">Método Dual</h2>
@@ -62,10 +57,11 @@
         <label for="restricciones">Digite la cantidad de restricciones:</label>
         <input name="restricciones" type="number" placeholder="Max 5">
         <br>
-        <select name=>
-            <option value="<=">Maximizar</option>
-            <option value=">=">Minimizar</option>
-          </select>
+        <label for="tipo">Tipo:</label>
+        <select name="tipo">
+            <option value="maximizar">Maximizar</option>
+            <option value="minimizar">Minimizar</option>
+        </select>
           <br>
         <button name="action" value="generarModelo" >Generar modelo</button>
         <br>
@@ -76,6 +72,9 @@
     <section  class="content-section"     style="display: {{ ocultar }};">
         <form action="" method="post">
             {% csrf_token %}
+            <input type="hidden" name="variables_count" value="{{ cantVariables|length }}">
+            <input type="hidden" name="restricciones_count" value="{{ cantRestricciones|length }}">
+            <input type="hidden" name="tipo" value="{{ tipo }}">
             <label for="variables">Funcion Objetivo:</label>
             {% for i in cantVariables %}
                 {% if forloop.first %}  
@@ -159,36 +158,61 @@
 
     <section class="content-section" style="display: {{ ocularTablas }};">
         <h1>Resultados del método Dual</h1>
-    
-        <h2>Tablas:</h2>
-        {% for tabla in tablas %}
+        
+        {% if error %}
+            <div class="error-message" style="color: red; background-color: #ffe6e6; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                <strong>Error:</strong> {{ error }}
+            </div>
+        {% endif %}
 
-            <table border="1">
-                <!-- Fila de encabezado -->
-                <h2 id="iteracion{{ forloop.counter0 }}">Iteración #{{ forloop.counter0 }}</h2>
-                <tr>
-                    {% for i in cantVariables %}
-                        <th>X{{ i }}</th>
-                    {% endfor %}
-                    {% for j in cantRestricciones%}
-                        <th>S{{ j }}</th>
-                    {% endfor %}
-                    <th>K</th>
-                </tr>
-                <!-- Fin de la fila de encabezado -->
-                
-                {% for fila in tabla %}
-                    <tr>
-                        {% for elemento in fila %}
-                            <td>{{ elemento }}</td>
+        {% if tablas %}
+            <h2>Tablas:</h2>
+            {% for tabla in tablas %}
+                <table border="1" style="margin: 10px 0; border-collapse: collapse;">
+                    <!-- Fila de encabezado -->
+                    <h3 id="iteracion{{ forloop.counter0 }}">Iteración #{{ forloop.counter0 }}</h3>
+                    <tr style="background-color: #f0f0f0;">
+                        {% for i in cantVariables %}
+                            <th style="padding: 8px; border: 1px solid #ccc;">X{{ i }}</th>
                         {% endfor %}
+                        {% for j in cantRestricciones%}
+                            <th style="padding: 8px; border: 1px solid #ccc;">S{{ j }}</th>
+                        {% endfor %}
+                        <th style="padding: 8px; border: 1px solid #ccc;">K</th>
                     </tr>
-                {% endfor %}
-            </table>
-            <br>
-        {% endfor %}
-        <h2>Resultados:</h2>
-        <p>Z: {{ resultado }}</p>      
+                    <!-- Fin de la fila de encabezado -->
+                    
+                    {% for fila in tabla %}
+                        <tr>
+                            {% for elemento in fila %}
+                                <td style="padding: 8px; border: 1px solid #ccc; text-align: center;">{{ elemento|floatformat:2 }}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </table>
+                <br>
+            {% endfor %}
+        {% endif %}
+        
+        {% if resultado %}
+            <h2>Resultados:</h2>
+            <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 10px 0;">
+                {% if resultado.estado %}
+                    <p><strong>Estado:</strong> {{ resultado.estado }}</p>
+                {% endif %}
+                {% if resultado.valor_optimo %}
+                    <p><strong>Valor óptimo:</strong> {{ resultado.valor_optimo|floatformat:2 }}</p>
+                {% endif %}
+                {% if resultado.valores_variables %}
+                    <p><strong>Valores de las variables:</strong></p>
+                    <ul>
+                        {% for variable, valor in resultado.valores_variables.items %}
+                            <li>{{ variable }} = {{ valor|floatformat:2 }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        {% endif %}
     </section>
 
 {% endblock %}

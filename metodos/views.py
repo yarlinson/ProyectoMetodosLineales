@@ -9,13 +9,6 @@ from django.conf import settings
 
 # Create your views here.
 
-cantRestricciones = []
-cantVariables = []
-cantVa = []
-cantRestriccionesDisminuido = []
-canVari = []
-tipo = []
-
 def descargar_archivo_rar(request):
     file_path = os.path.join(os.path.dirname(__file__),'desarrolloMetodos', 'MetodoGraficoEjecutable.rar')  # Ruta al archivo .rar
     if os.path.exists(file_path):
@@ -34,11 +27,10 @@ def index(request):
     return render(request, 'index.html')
 
 def metodogranm(request):
-    global cantRestricciones, cantVariables, cantVa, cantRestriccionesDisminuido, canVari, tipo
-    displayTablas= "none"
+    displayTablas = "none"
     if request.method == 'GET':
         display = "none"
-        displayTablas= "none"
+        displayTablas = "none"
         
         return render(request, 'metodogranm.html', {
             'ocultar': display,
@@ -46,95 +38,113 @@ def metodogranm(request):
         })
     else:
         Action = request.POST.get('action')
-        datosDelModelo = []
-        datosDelfuncionObjetivo = []
-        datosRestricciones=[]
-        datosRestriccionesFinales=[]
-        datosDelfuncionObjetivo=[]
-        datosRestricciones=[]
-        datosRestriccionesFinales=[]
-        retriccionesIndividuales=[]
-        signos=[]
-        coeficiente=[]
-        print(Action)
         display = "block"
         
         if Action == "generarModelo":   
-            cantRestricciones = range(int(request.POST["restricciones"]))
-            cantRestriccionesDisminuido = range(int(request.POST["restricciones"])-1)
-            cantVa = range(int(request.POST["variables"])-1)
-            cantVariables = range(int(request.POST["variables"]))
-            tipo = request.POST["tipo"]
-            print(tipo)
-            
-            return render(request, 'metodogranm.html', {
-                'cantVariables': cantVariables,
-                'cantRestricciones': cantRestricciones, 
-                'ocultar': display,
-                'ocularTablas': displayTablas
-            })
-        if Action == "Desarrollar":
-            displayTablas = "block"
-            print(cantRestricciones)
-            print(cantVariables)
-            canVari = max(cantVariables)+1
-            for i in cantVariables:
-                dato= request.POST.get(f'variablesFuncion_{i}')
-                print(dato)
-                datosDelModelo.append(dato)
-                datosDelfuncionObjetivo.append(dato)
-            for j in cantRestricciones:
-                for i in cantVariables:
-                    dato = request.POST.get(f'variables_{j}_{i}')
-                    datosDelModelo.append(dato)
-                    datosRestricciones.append(dato)       
-                dato = request.POST.get(f'variablesR_{j}')
-                print(dato)
-                datosDelModelo.append(dato)
-                datosRestriccionesFinales.append(dato)
-                datosRestricciones.append(dato)
-            for i in cantRestricciones:
-                datoSigno= request.POST.get(f'signo{i}')
-                signos.append(datoSigno)
-            
-        
-            n= len(datosDelfuncionObjetivo)+1
-            print(datosRestricciones)
-            for i in range(0, len(datosRestricciones), max(cantVariables)+2):
-                print(datosRestricciones[i:i+n])
-                retriccionesIndividuales.append(datosRestricciones[i:i+n])
+            try:
+                cant_restricciones = int(request.POST["restricciones"])
+                cant_variables = int(request.POST["variables"])
+                tipo = request.POST["tipo"]
                 
-            print(retriccionesIndividuales)   
-            print(signos) 
-            print(datosDelfuncionObjetivo)
-            print(tipo)
-       
-            resultados = simplex_gran_m(retriccionesIndividuales, signos, datosDelfuncionObjetivo, tipo)
-            
-            
-            nuevaFuncionZ=list(zip(datosDelfuncionObjetivo,cantVariables))
-            print("Datos combinados:", nuevaFuncionZ)
-                       
-            return render(request, 'metodogranm.html', {
-                'cantVariables': cantVariables,
-                'cantRestricciones': cantRestricciones, 
-                'ocultar': display,
-                'fucionObjetivo':datosDelfuncionObjetivo ,
-                'datosDelModelo': datosDelModelo,
-                'datosDerestricciones': datosRestricciones,
-                'retriccionesIndividuales':retriccionesIndividuales,
-                'cantRestriccionesDisminuidas': cantRestriccionesDisminuido,
-                'ocularTablas': displayTablas,
-                'nuevaFuncionZ': nuevaFuncionZ,
-                'resultado': resultados
-            })
+                cantRestricciones = range(cant_restricciones)
+                cantRestriccionesDisminuido = range(cant_restricciones-1)
+                cantVa = range(cant_variables-1)
+                cantVariables = range(cant_variables)
+                
+                return render(request, 'metodogranm.html', {
+                    'cantVariables': cantVariables,
+                    'cantRestricciones': cantRestricciones, 
+                    'ocultar': display,
+                    'ocularTablas': displayTablas,
+                    'tipo': tipo
+                })
+            except (ValueError, KeyError) as e:
+                return render(request, 'metodogranm.html', {
+                    'ocultar': "none",
+                    'ocularTablas': "none",
+                    'error': f"Error en los datos: {str(e)}"
+                })
+                
+        if Action == "Desarrollar":
+            try:
+                # Obtener datos del POST
+                variables_count = int(request.POST.get('variables_count', 0))
+                restricciones_count = int(request.POST.get('restricciones_count', 0))
+                tipo = request.POST.get('tipo', 'maximizar')
+                
+                cantVariables = range(variables_count)
+                cantRestricciones = range(restricciones_count)
+                cantRestriccionesDisminuido = range(restricciones_count-1)
+                
+                # Recopilar datos de la función objetivo
+                datosDelfuncionObjetivo = []
+                for i in cantVariables:
+                    dato = request.POST.get(f'variablesFuncion_{i}')
+                    if dato is None or dato == '':
+                        raise ValueError(f"Falta coeficiente para X{i}")
+                    datosDelfuncionObjetivo.append(dato)
+                
+                # Recopilar datos de restricciones
+                datosRestricciones = []
+                retriccionesIndividuales = []
+                signos = []
+                
+                for j in cantRestricciones:
+                    restriccion = []
+                    for i in cantVariables:
+                        dato = request.POST.get(f'variables_{j}_{i}')
+                        if dato is None or dato == '':
+                            raise ValueError(f"Falta coeficiente para X{i} en restricción {j+1}")
+                        restriccion.append(dato)
+                        datosRestricciones.append(dato)
+                    
+                    # Agregar término independiente
+                    datoR = request.POST.get(f'variablesR_{j}')
+                    if datoR is None or datoR == '':
+                        raise ValueError(f"Falta término independiente en restricción {j+1}")
+                    restriccion.append(datoR)
+                    datosRestricciones.append(datoR)
+                    
+                    # Obtener signo
+                    signo = request.POST.get(f'signo{j}')
+                    if signo is None:
+                        raise ValueError(f"Falta signo para restricción {j+1}")
+                    signos.append(signo)
+                    
+                    retriccionesIndividuales.append(restriccion)
+                
+                # Procesar resultados
+                displayTablas = "block"
+                resultados = simplex_gran_m(retriccionesIndividuales, signos, datosDelfuncionObjetivo, tipo)
+                nuevaFuncionZ = list(zip(datosDelfuncionObjetivo, cantVariables))
+                
+                return render(request, 'metodogranm.html', {
+                    'cantVariables': cantVariables,
+                    'cantRestricciones': cantRestricciones, 
+                    'ocultar': display,
+                    'fucionObjetivo': datosDelfuncionObjetivo,
+                    'datosDelModelo': datosRestricciones,
+                    'datosDerestricciones': datosRestricciones,
+                    'retriccionesIndividuales': retriccionesIndividuales,
+                    'cantRestriccionesDisminuidas': cantRestriccionesDisminuido,
+                    'ocularTablas': displayTablas,
+                    'nuevaFuncionZ': nuevaFuncionZ,
+                    'resultado': resultados,
+                    'tipo': tipo
+                })
+                
+            except (ValueError, KeyError) as e:
+                return render(request, 'metodogranm.html', {
+                    'ocultar': "none",
+                    'ocularTablas': "none",
+                    'error': f"Error en los datos: {str(e)}"
+                })
 
 def metododosfases(request):
-    global cantRestricciones, cantVariables, cantVa, cantRestriccionesDisminuido, canVari, tipo
-    displayTablas= "none"
+    displayTablas = "none"
     if request.method == 'GET':
         display = "none"
-        displayTablas= "none"
+        displayTablas = "none"
         
         return render(request, 'metododosfases.html', {
             'ocultar': display,
@@ -142,100 +152,118 @@ def metododosfases(request):
         })
     else:
         Action = request.POST.get('action')
-        datosDelModelo = []
-        datosDelfuncionObjetivo = []
-        datosRestricciones=[]
-        datosRestriccionesFinales=[]
-        datosDelfuncionObjetivo=[]
-        datosRestricciones=[]
-        datosRestriccionesFinales=[]
-        retriccionesIndividuales=[]
-        signos=[]
-        coeficiente=[]
-        print(Action)
         display = "block"
         
         if Action == "generarModelo":   
-            cantRestricciones = range(int(request.POST["restricciones"]))
-            cantRestriccionesDisminuido = range(int(request.POST["restricciones"])-1)
-            cantVa = range(int(request.POST["variables"])-1)
-            cantVariables = range(int(request.POST["variables"]))
-            tipo = request.POST["tipo"]
-            print(tipo)
-            
-            return render(request, 'metododosfases.html', {
-                'cantVariables': cantVariables,
-                'cantRestricciones': cantRestricciones, 
-                'ocultar': display,
-                'ocularTablas': displayTablas
-            })
-        if Action == "Desarrollar":
-            displayTablas = "block"
-            print(cantRestricciones)
-            print(cantVariables)
-            canVari = max(cantVariables)+1
-            for i in cantVariables:
-                dato= request.POST.get(f'variablesFuncion_{i}')
-                print(dato)
-                datosDelModelo.append(dato)
-                datosDelfuncionObjetivo.append(dato)
-            for j in cantRestricciones:
-                for i in cantVariables:
-                    dato = request.POST.get(f'variables_{j}_{i}')
-                    datosDelModelo.append(dato)
-                    datosRestricciones.append(dato)       
-                dato = request.POST.get(f'variablesR_{j}')
-                print(dato)
-                datosDelModelo.append(dato)
-                datosRestriccionesFinales.append(dato)
-                datosRestricciones.append(dato)
-            for i in cantRestricciones:
-                datoSigno= request.POST.get(f'signo{i}')
-                signos.append(datoSigno)
-            
-        
-            n= len(datosDelfuncionObjetivo)+1
-            print(datosRestricciones)
-            for i in range(0, len(datosRestricciones), max(cantVariables)+2):
-                print(datosRestricciones[i:i+n])
-                retriccionesIndividuales.append(datosRestricciones[i:i+n])
+            try:
+                cant_restricciones = int(request.POST["restricciones"])
+                cant_variables = int(request.POST["variables"])
+                tipo = request.POST["tipo"]
                 
-            print(retriccionesIndividuales)   
-            print(signos) 
-            print(datosDelfuncionObjetivo)
-            print(tipo)
-       
-            status, valor_optimo, resultados = two_phase_simplex(retriccionesIndividuales, signos, datosDelfuncionObjetivo, tipo)
-            
-            
-            nuevaFuncionZ=list(zip(datosDelfuncionObjetivo,cantVariables))
-            print("Datos combinados:", nuevaFuncionZ)
-                       
-            return render(request, 'metododosfases.html', {
-                'cantVariables': cantVariables,
-                'cantRestricciones': cantRestricciones, 
-                'ocultar': display,
-                'fucionObjetivo':datosDelfuncionObjetivo ,
-                'datosDelModelo': datosDelModelo,
-                'datosDerestricciones': datosRestricciones,
-                'retriccionesIndividuales':retriccionesIndividuales,
-                'cantRestriccionesDisminuidas': cantRestriccionesDisminuido,
-                'ocularTablas': displayTablas,
-                'nuevaFuncionZ': nuevaFuncionZ,
-                'resultado': resultados,
-                'Zoptimo': valor_optimo
-            })
+                cantRestricciones = range(cant_restricciones)
+                cantRestriccionesDisminuido = range(cant_restricciones-1)
+                cantVa = range(cant_variables-1)
+                cantVariables = range(cant_variables)
+                
+                return render(request, 'metododosfases.html', {
+                    'cantVariables': cantVariables,
+                    'cantRestricciones': cantRestricciones, 
+                    'ocultar': display,
+                    'ocularTablas': displayTablas,
+                    'tipo': tipo
+                })
+            except (ValueError, KeyError) as e:
+                return render(request, 'metododosfases.html', {
+                    'ocultar': "none",
+                    'ocularTablas': "none",
+                    'error': f"Error en los datos: {str(e)}"
+                })
+                
+        if Action == "Desarrollar":
+            try:
+                # Obtener datos del POST
+                variables_count = int(request.POST.get('variables_count', 0))
+                restricciones_count = int(request.POST.get('restricciones_count', 0))
+                tipo = request.POST.get('tipo', 'maximizar')
+                
+                cantVariables = range(variables_count)
+                cantRestricciones = range(restricciones_count)
+                cantRestriccionesDisminuido = range(restricciones_count-1)
+                
+                # Recopilar datos de la función objetivo
+                datosDelfuncionObjetivo = []
+                for i in cantVariables:
+                    dato = request.POST.get(f'variablesFuncion_{i}')
+                    if dato is None or dato == '':
+                        raise ValueError(f"Falta coeficiente para X{i}")
+                    datosDelfuncionObjetivo.append(dato)
+                
+                # Recopilar datos de restricciones
+                datosRestricciones = []
+                retriccionesIndividuales = []
+                signos = []
+                
+                for j in cantRestricciones:
+                    restriccion = []
+                    for i in cantVariables:
+                        dato = request.POST.get(f'variables_{j}_{i}')
+                        if dato is None or dato == '':
+                            raise ValueError(f"Falta coeficiente para X{i} en restricción {j+1}")
+                        restriccion.append(dato)
+                        datosRestricciones.append(dato)
+                    
+                    # Agregar término independiente
+                    datoR = request.POST.get(f'variablesR_{j}')
+                    if datoR is None or datoR == '':
+                        raise ValueError(f"Falta término independiente en restricción {j+1}")
+                    restriccion.append(datoR)
+                    datosRestricciones.append(datoR)
+                    
+                    # Obtener signo
+                    signo = request.POST.get(f'signo{j}')
+                    if signo is None:
+                        raise ValueError(f"Falta signo para restricción {j+1}")
+                    signos.append(signo)
+                    
+                    retriccionesIndividuales.append(restriccion)
+                
+                # Procesar resultados
+                displayTablas = "block"
+                status, valor_optimo, resultados = two_phase_simplex(retriccionesIndividuales, signos, datosDelfuncionObjetivo, tipo)
+                nuevaFuncionZ = list(zip(datosDelfuncionObjetivo, cantVariables))
+                
+                return render(request, 'metododosfases.html', {
+                    'cantVariables': cantVariables,
+                    'cantRestricciones': cantRestricciones, 
+                    'ocultar': display,
+                    'fucionObjetivo': datosDelfuncionObjetivo,
+                    'datosDelModelo': datosRestricciones,
+                    'datosDerestricciones': datosRestricciones,
+                    'retriccionesIndividuales': retriccionesIndividuales,
+                    'cantRestriccionesDisminuidas': cantRestriccionesDisminuido,
+                    'ocularTablas': displayTablas,
+                    'nuevaFuncionZ': nuevaFuncionZ,
+                    'resultado': resultados,
+                    'Zoptimo': valor_optimo,
+                    'tipo': tipo
+                })
+                
+            except (ValueError, KeyError) as e:
+                return render(request, 'metododosfases.html', {
+                    'ocultar': "none",
+                    'ocularTablas': "none",
+                    'error': f"Error en los datos: {str(e)}"
+                })
 
 
 def metodografico(request):
     return render(request, 'metodografico.html')
 
 def metododual(request):
-    global cantRestricciones, cantVariables, cantVa, cantRestriccionesDisminuido, canVari
-    displayTablas= "none"
+    displayTablas = "none"
     if request.method == 'GET':
         display = "none"
-        displayTablas= "none"
+        displayTablas = "none"
         
         return render(request, 'metododual.html', {
             'ocultar': display,
@@ -243,110 +271,121 @@ def metododual(request):
         })
     else:
         Action = request.POST.get('action')
-        datosDelModelo = []
-        datosDelfuncionObjetivo = []
-        datosRestricciones=[]
-        datosRestriccionesFinales=[]
-        datosDelfuncionObjetivo=[]
-        datosRestricciones=[]
-        datosRestriccionesFinales=[]
-        retriccionesIndividuales=[]
-        signos=[]
-        coeficiente=[]
-        print(Action)
         display = "block"
         
         if Action == "generarModelo":   
-            cantRestricciones = range(int(request.POST["restricciones"]))
-            cantRestriccionesDisminuido = range(int(request.POST["restricciones"])-1)
-            cantVa = range(int(request.POST["variables"])-1)
-            cantVariables = range(int(request.POST["variables"]))
-            
-            print(cantRestricciones)
-            print(cantVariables)
-           
-            return render(request, 'metododual.html', {
-                'cantVariables': cantVariables,
-                'cantRestricciones': cantRestricciones, 
-                'ocultar': display,
-                'ocularTablas': displayTablas
-            })
-            
-        if Action == "Desarrollar":
-            displayTablas = "block"
-            print(cantRestricciones)
-            print(cantVariables)
-            canVari = max(cantVariables)+1
-            for i in cantVariables:
-                dato= request.POST.get(f'variablesFuncion_{i}')
-                print(dato)
-                datosDelModelo.append(dato)
-                datosDelfuncionObjetivo.append(dato)
-            for j in cantRestricciones:
-                for i in cantVariables:
-                    dato = request.POST.get(f'variables_{j}_{i}')
-                    datosDelModelo.append(dato)
-                    datosRestricciones.append(dato)       
-                dato = request.POST.get(f'variablesR_{j}')
-                print(dato)
-                datosDelModelo.append(dato)
-                datosRestriccionesFinales.append(dato)
-                datosRestricciones.append(dato)
-            for i in cantRestricciones:
-                datoSigno= request.POST.get(f'signo{i}')
-                signos.append(datoSigno)
-            
-        
-            print(max(cantVariables)+2)
-            print(len(datosRestricciones))
-            n= len(datosDelfuncionObjetivo)+1
-            print(datosRestricciones)
-            for i in range(0, len(datosRestricciones), max(cantVariables)+2):
-                print(datosRestricciones[i:i+n])
-                retriccionesIndividuales.append(datosRestricciones[i:i+n])
+            try:
+                cant_restricciones = int(request.POST["restricciones"])
+                cant_variables = int(request.POST["variables"])
+                tipo = request.POST["tipo"]
                 
-            print(retriccionesIndividuales)   
-            print(signos) 
-            print(datosDelfuncionObjetivo)
-       
-            tipo = "minimizar"
-            resultados = simplex_dual_pulp(retriccionesIndividuales, signos, datosDelfuncionObjetivo, tipo)
-            print(resultados)
-            
-            simplex = Simplex(retriccionesIndividuales, signos, datosDelfuncionObjetivo, "minimizar")
-            simplex.preparar_datos()
-            tablasDeDual = simplex.resolver()
-            print(tablasDeDual)
-            
-            nuevaFuncionZ=list(zip(datosDelfuncionObjetivo,cantVariables))
-            print("Datos combinados:", nuevaFuncionZ)
-            
-        
-            
-            
-            return render(request, 'metododual.html', {
-                'cantVariables': cantVariables,
-                'cantRestricciones': cantRestricciones, 
-                'ocultar': display,
-                'fucionObjetivo':datosDelfuncionObjetivo ,
-                'datosDelModelo': datosDelModelo,
-                'datosDerestricciones': datosRestricciones,
-                'retriccionesIndividuales':retriccionesIndividuales,
-                'cantRestriccionesDisminuidas': cantRestriccionesDisminuido,
-                'ocularTablas': displayTablas,
-                "tablas": tablasDeDual,
-                'nuevaFuncionZ': nuevaFuncionZ,
-                'resultado': resultados
-            })
+                cantRestricciones = range(cant_restricciones)
+                cantRestriccionesDisminuido = range(cant_restricciones-1)
+                cantVa = range(cant_variables-1)
+                cantVariables = range(cant_variables)
+                
+                return render(request, 'metododual.html', {
+                    'cantVariables': cantVariables,
+                    'cantRestricciones': cantRestricciones, 
+                    'ocultar': display,
+                    'ocularTablas': displayTablas,
+                    'tipo': tipo
+                })
+            except (ValueError, KeyError) as e:
+                return render(request, 'metododual.html', {
+                    'ocultar': "none",
+                    'ocularTablas': "none",
+                    'error': f"Error en los datos: {str(e)}"
+                })
+                
+        if Action == "Desarrollar":
+            try:
+                # Obtener datos del POST
+                variables_count = int(request.POST.get('variables_count', 0))
+                restricciones_count = int(request.POST.get('restricciones_count', 0))
+                tipo = request.POST.get('tipo', 'minimizar')
+                
+                cantVariables = range(variables_count)
+                cantRestricciones = range(restricciones_count)
+                cantRestriccionesDisminuido = range(restricciones_count-1)
+                
+                # Recopilar datos de la función objetivo
+                datosDelfuncionObjetivo = []
+                for i in cantVariables:
+                    dato = request.POST.get(f'variablesFuncion_{i}')
+                    if dato is None or dato == '':
+                        raise ValueError(f"Falta coeficiente para X{i}")
+                    datosDelfuncionObjetivo.append(dato)
+                
+                # Recopilar datos de restricciones
+                datosRestricciones = []
+                retriccionesIndividuales = []
+                signos = []
+                
+                for j in cantRestricciones:
+                    restriccion = []
+                    for i in cantVariables:
+                        dato = request.POST.get(f'variables_{j}_{i}')
+                        if dato is None or dato == '':
+                            raise ValueError(f"Falta coeficiente para X{i} en restricción {j+1}")
+                        restriccion.append(dato)
+                        datosRestricciones.append(dato)
+                    
+                    # Agregar término independiente
+                    datoR = request.POST.get(f'variablesR_{j}')
+                    if datoR is None or datoR == '':
+                        raise ValueError(f"Falta término independiente en restricción {j+1}")
+                    restriccion.append(datoR)
+                    datosRestricciones.append(datoR)
+                    
+                    # Obtener signo
+                    signo = request.POST.get(f'signo{j}')
+                    if signo is None:
+                        raise ValueError(f"Falta signo para restricción {j+1}")
+                    signos.append(signo)
+                    
+                    retriccionesIndividuales.append(restriccion)
+                
+                # Procesar resultados
+                displayTablas = "block"
+                resultados = simplex_dual_pulp(retriccionesIndividuales, signos, datosDelfuncionObjetivo, tipo)
+                
+                simplex = Simplex(retriccionesIndividuales, signos, datosDelfuncionObjetivo, tipo)
+                simplex.preparar_datos()
+                tablasDeDual = simplex.resolver()
+                
+                nuevaFuncionZ = list(zip(datosDelfuncionObjetivo, cantVariables))
+                
+                return render(request, 'metododual.html', {
+                    'cantVariables': cantVariables,
+                    'cantRestricciones': cantRestricciones, 
+                    'ocultar': display,
+                    'fucionObjetivo': datosDelfuncionObjetivo,
+                    'datosDelModelo': datosRestricciones,
+                    'datosDerestricciones': datosRestricciones,
+                    'retriccionesIndividuales': retriccionesIndividuales,
+                    'cantRestriccionesDisminuidas': cantRestriccionesDisminuido,
+                    'ocularTablas': displayTablas,
+                    "tablas": tablasDeDual,
+                    'nuevaFuncionZ': nuevaFuncionZ,
+                    'resultado': resultados,
+                    'tipo': tipo
+                })
+                
+            except (ValueError, KeyError) as e:
+                return render(request, 'metododual.html', {
+                    'ocultar': "none",
+                    'ocularTablas': "none",
+                    'error': f"Error en los datos: {str(e)}"
+                })
         
               
 
 def metodosimplex(request):
-    global cantRestricciones, cantVariables, cantVa, cantRestriccionesDisminuido, canVari
-    displayTablas= "none"
+    displayTablas = "none"
     if request.method == 'GET':
         display = "none"
-        displayTablas= "none"
+        displayTablas = "none"
         
         return render(request, 'metodosimplex.html', {
             'ocultar': display,
@@ -354,106 +393,113 @@ def metodosimplex(request):
         })
     else:
         Action = request.POST.get('action')
-        datosDelModelo = []
-        datosDelfuncionObjetivo = []
-        datosRestricciones=[]
-        datosRestriccionesFinales=[]
-        datosDelfuncionObjetivo=[]
-        datosRestricciones=[]
-        datosRestriccionesFinales=[]
-        retriccionesIndividuales=[]
-        print(Action)
         display = "block"
         
         if Action == "generarModelo":   
-            cantRestricciones = range(int(request.POST["restricciones"]))
-            cantRestriccionesDisminuido = range(int(request.POST["restricciones"])-1)
-            cantVa = range(int(request.POST["variables"])-1)
-            cantVariables = range(int(request.POST["variables"]))
-            
-            print(cantRestricciones)
-            print(cantVariables)
-           
-            return render(request, 'metodosimplex.html', {
-                'cantVariables': cantVariables,
-                'cantRestricciones': cantRestricciones, 
-                'ocultar': display,
-                'ocularTablas': displayTablas
-            })
-            
-        if Action == "Desarrollar":
-            displayTablas = "block"
-            print(cantRestricciones)
-            print(cantVariables)
-            canVari = max(cantVariables)+1
-            for i in cantVariables:
-                dato= request.POST.get(f'variablesFuncion_{i}')
-                print(dato)
-                datosDelModelo.append(dato)
-                datosDelfuncionObjetivo.append(dato)
-        
-            
-            for j in cantRestricciones:
-                for i in cantVariables:
-                    dato = request.POST.get(f'variables_{j}_{i}')
-                    datosDelModelo.append(dato)
-                    datosRestricciones.append(dato)
-                       
-                dato = request.POST.get(f'variablesR_{j}')
-                print(dato)
-                datosDelModelo.append(dato)
-                datosRestriccionesFinales.append(dato)
-                datosRestricciones.append(dato)
-            
-            print(max(cantVariables)+2)
-            print(len(datosRestricciones))
-            n= len(datosDelfuncionObjetivo)+1
-            print(datosRestricciones)
-            for i in range(0, len(datosRestricciones), max(cantVariables)+2):
-                print(datosRestricciones[i:i+n])
-                retriccionesIndividuales.append(datosRestricciones[i:i+n])
+            try:
+                cant_restricciones = int(request.POST["restricciones"])
+                cant_variables = int(request.POST["variables"])
+                tipo = request.POST.get("tipo", "maximizar")
                 
-            print(retriccionesIndividuales)    
-            print(datosDelfuncionObjetivo)
-            print(canVari)
-            metodo = MetodoSimplex()
-            tablas = metodo.resolver_simplex(retriccionesIndividuales, datosDelfuncionObjetivo)
-            resultados = resolver_problema_optimizacion(canVari,datosDelfuncionObjetivo,retriccionesIndividuales)
-            print(tablas)
-            print(type(resultados))
-            print(resultados)
-            print(cantRestriccionesDisminuido)
-            nuevaFuncionZ=list(zip(datosDelfuncionObjetivo,cantVariables))
-            # Convertir los elementos de 'a' a números
-            a_numeros = [int(valor) for valor in datosDelfuncionObjetivo]
-
-            # Inicializar el resultado
-            Zoptimo = 0
-
-            # Iterar a través de los elementos y realizar las multiplicaciones y sumas
-            for i, valor in enumerate(a_numeros):
-                clave = f'X{i+1}'
-                Zoptimo += valor * resultados.get(clave, 0)
-
-            print(Zoptimo)    
-
-            
-            print("Datos combinados:", nuevaFuncionZ)
-            return render(request, 'metodosimplex.html', {
-                'cantVariables': cantVariables,
-                'cantRestricciones': cantRestricciones, 
-                'ocultar': display,
-                'fucionObjetivo':datosDelfuncionObjetivo ,
-                'datosDelModelo': datosDelModelo,
-                'datosDerestricciones': datosRestricciones,
-                'retriccionesIndividuales':retriccionesIndividuales,
-                'tablas': tablas,
-                'resultados': resultados,
-                'cantRestriccionesDisminuidas': cantRestriccionesDisminuido,
-                'ocularTablas': displayTablas,
-                'nuevaFuncionZ': nuevaFuncionZ,
-                'Zoptimo': Zoptimo
-            })
+                cantRestricciones = range(cant_restricciones)
+                cantRestriccionesDisminuido = range(cant_restricciones-1)
+                cantVa = range(cant_variables-1)
+                cantVariables = range(cant_variables)
+                
+                return render(request, 'metodosimplex.html', {
+                    'cantVariables': cantVariables,
+                    'cantRestricciones': cantRestricciones, 
+                    'ocultar': display,
+                    'ocularTablas': displayTablas,
+                    'tipo': tipo
+                })
+            except (ValueError, KeyError) as e:
+                return render(request, 'metodosimplex.html', {
+                    'ocultar': "none",
+                    'ocularTablas': "none",
+                    'error': f"Error en los datos: {str(e)}"
+                })
+                
+        if Action == "Desarrollar":
+            try:
+                # Obtener datos del POST
+                variables_count = int(request.POST.get('variables_count', 0))
+                restricciones_count = int(request.POST.get('restricciones_count', 0))
+                tipo = request.POST.get('tipo', 'maximizar')
+                
+                cantVariables = range(variables_count)
+                cantRestricciones = range(restricciones_count)
+                cantRestriccionesDisminuido = range(restricciones_count-1)
+                canVari = variables_count
+                
+                # Recopilar datos de la función objetivo
+                datosDelfuncionObjetivo = []
+                for i in cantVariables:
+                    dato = request.POST.get(f'variablesFuncion_{i}')
+                    if dato is None or dato == '':
+                        raise ValueError(f"Falta coeficiente para X{i}")
+                    datosDelfuncionObjetivo.append(dato)
+                
+                # Recopilar datos de restricciones
+                datosRestricciones = []
+                retriccionesIndividuales = []
+                
+                for j in cantRestricciones:
+                    restriccion = []
+                    for i in cantVariables:
+                        dato = request.POST.get(f'variables_{j}_{i}')
+                        if dato is None or dato == '':
+                            raise ValueError(f"Falta coeficiente para X{i} en restricción {j+1}")
+                        restriccion.append(dato)
+                        datosRestricciones.append(dato)
+                    
+                    # Agregar término independiente
+                    datoR = request.POST.get(f'variablesR_{j}')
+                    if datoR is None or datoR == '':
+                        raise ValueError(f"Falta término independiente en restricción {j+1}")
+                    restriccion.append(datoR)
+                    datosRestricciones.append(datoR)
+                    
+                    retriccionesIndividuales.append(restriccion)
+                
+                # Procesar resultados
+                displayTablas = "block"
+                metodo = MetodoSimplex()
+                tablas = metodo.resolver_simplex(retriccionesIndividuales, datosDelfuncionObjetivo)
+                resultados = resolver_problema_optimizacion(canVari, datosDelfuncionObjetivo, retriccionesIndividuales)
+                
+                nuevaFuncionZ = list(zip(datosDelfuncionObjetivo, cantVariables))
+                
+                # Calcular Z óptimo
+                a_numeros = [float(valor) for valor in datosDelfuncionObjetivo]
+                Zoptimo = 0
+                for i, valor in enumerate(a_numeros):
+                    clave = f'X{i+1}'
+                    Zoptimo += valor * resultados.get(clave, 0)
+                
+                return render(request, 'metodosimplex.html', {
+                    'cantVariables': cantVariables,
+                    'cantRestricciones': cantRestricciones, 
+                    'ocultar': display,
+                    'fucionObjetivo': datosDelfuncionObjetivo,
+                    'datosDelModelo': datosRestricciones,
+                    'datosDerestricciones': datosRestricciones,
+                    'retriccionesIndividuales': retriccionesIndividuales,
+                    'tablas': tablas,
+                    'resultados': resultados,
+                    'cantRestriccionesDisminuidas': cantRestriccionesDisminuido,
+                    'ocularTablas': displayTablas,
+                    'nuevaFuncionZ': nuevaFuncionZ,
+                    'Zoptimo': Zoptimo,
+                    'tipo': tipo
+                })
+                
+            except (ValueError, KeyError) as e:
+                return render(request, 'metodosimplex.html', {
+                    'ocultar': "none",
+                    'ocularTablas': "none",
+                    'error': f"Error en los datos: {str(e)}"
+                })
         
         
     

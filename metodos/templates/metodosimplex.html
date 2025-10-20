@@ -49,7 +49,7 @@
             <input name="restricciones" type="number" placeholder="Max 5">
             <br>
             <button name="action" value="generarModelo" >Generar modelo</button>
-            <button name "action" value="BorrarModelo">Limpiar</button>
+            <button name="action" value="BorrarModelo">Limpiar</button>
         </form>
     </section>
 
@@ -57,6 +57,13 @@
 <section class="content-section" style="display: {{ ocultar }};">
     <form action="" method="post">
         {% csrf_token %}
+        <input type="hidden" name="variables_count" value="{{ cantVariables|length }}">
+        <input type="hidden" name="restricciones_count" value="{{ cantRestricciones|length }}">
+        <label for="tipo">Tipo:</label>
+        <select name="tipo">
+            <option value="maximizar">Maximizar</option>
+            <option value="minimizar">Minimizar</option>
+        </select>
         <label for="variables">Funcion Objetivo:</label>
         {% for i in cantVariables %}
             {% if forloop.first %}  
@@ -84,9 +91,11 @@
                         <label for="variables">X{{i}}</label>
                     {% endif %}
              {% endfor %}
-             <select id="opciones">
-                <option value="opcion2"><=</option>
-              </select>
+             <select name="signo{{j}}">
+                <option value="<="><=</option>
+                <option value=">=">>=</option>
+                <option value="=">=</option>
+             </select>
             <input name="variablesR_{{j}}" type="number" placeholder="Max 5">
         {% endfor %}
         <br>
@@ -136,39 +145,56 @@
     {% endfor %}
 </section>
 
-<section class="content-section" style="display: {{ ocularTablas }};">
+    <section class="content-section" style="display: {{ ocularTablas }};">
     <h1>Resultados del método simplex</h1>
-
-    <h2>Tablas:</h2>
-    {% for tabla in tablas %}
-        <table border="1">
-            <!-- Fila de encabezado -->
-            <h2 id="iteracion{{ forloop.counter0 }}">Iteración #{{ forloop.counter0 }}</h2>
-            <tr>
-                {% for i in cantVariables %}
-                    <th>X{{ i }}</th>
-                {% endfor %}
-                {% for j in cantRestricciones%}
-                    <th>S{{ j }}</th>
-                {% endfor %}
-                <th>K</th>
-            </tr>
-            <!-- Fin de la fila de encabezado -->
-            
-            {% for fila in tabla %}
-                <tr>
-                    {% for elemento in fila %}
-                        <td>{{ elemento }}</td>
-                    {% endfor %}
-                </tr>
-            {% endfor %}
-        </table>
-        <br>
-    {% endfor %}
     
-    <h2>Resultados:</h2>
-    <p>Tipo de resultados: {{ resultados }}</p>
-    <p>Z: {{ Zoptimo }}</p>
+    {% if error %}
+        <div class="error-message" style="color: red; background-color: #ffe6e6; padding: 10px; border-radius: 5px; margin: 10px 0;">
+            <strong>Error:</strong> {{ error }}
+        </div>
+    {% endif %}
+
+    {% if tablas %}
+        <h2>Tablas:</h2>
+        {% for tabla in tablas %}
+            <table border="1" style="margin: 10px 0; border-collapse: collapse;">
+                <!-- Fila de encabezado -->
+                <h3 id="iteracion{{ forloop.counter0 }}">Iteración #{{ forloop.counter0 }}</h3>
+                <tr style="background-color: #f0f0f0;">
+                    {% for i in cantVariables %}
+                        <th style="padding: 8px; border: 1px solid #ccc;">X{{ i }}</th>
+                    {% endfor %}
+                    {% for j in cantRestricciones%}
+                        <th style="padding: 8px; border: 1px solid #ccc;">S{{ j }}</th>
+                    {% endfor %}
+                    <th style="padding: 8px; border: 1px solid #ccc;">K</th>
+                </tr>
+                <!-- Fin de la fila de encabezado -->
+                
+                {% for fila in tabla %}
+                    <tr>
+                        {% for elemento in fila %}
+                            <td style="padding: 8px; border: 1px solid #ccc; text-align: center;">{{ elemento|floatformat:2 }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </table>
+            <br>
+        {% endfor %}
+    {% endif %}
+    
+    {% if resultados %}
+        <h2>Resultados:</h2>
+        <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 10px 0;">
+            <p><strong>Valores de las variables:</strong></p>
+            <ul>
+                {% for variable, valor in resultados.items %}
+                    <li>{{ variable }} = {{ valor|floatformat:2 }}</li>
+                {% endfor %}
+            </ul>
+            <p><strong>Valor óptimo (Z):</strong> {{ Zoptimo|floatformat:2 }}</p>
+        </div>
+    {% endif %}
 </section>
 
 <script>
